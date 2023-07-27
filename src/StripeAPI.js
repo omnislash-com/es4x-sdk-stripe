@@ -80,6 +80,23 @@ class	StripeAPI
 		return await this.query(QueryUtils.HTTP_METHOD_GET, path, null, _secretKey);
 	}
 
+	// connected account: create account link
+	// doc: https://stripe.com/docs/api/account_links/create
+	async	connect_createAccountLink(_id, _refreshUrl, _returnUrl, _secretKey = "")
+	{
+		// prepare the data
+		let	data = {
+			account: _id,
+			refresh_url: _refreshUrl,
+			return_url: _returnUrl,
+			type: "account_onboarding"
+		};
+		let	path = "/account_links";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);		
+	}
+
 }
 
 module.exports = {

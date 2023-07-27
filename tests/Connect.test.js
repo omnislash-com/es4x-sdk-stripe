@@ -43,7 +43,15 @@ suite.test("StripeAPI.connect_createAccount", async function (context) {
 		console.log("-> account read: " + retRead.content.id);
 
 		// generate url to onboard
-		
+		let	returnUrl = config.connect.return_url;
+		let	refreshUrl = config.connect.refresh_url;
+		let	retLink = await stripeApi.connect_createAccountLink(accountId, refreshUrl, returnUrl);
+
+		context.assertNotNull(retLink);
+		context.assertEquals(retLink.statusCode, 200);
+		context.assertNotNull(retLink.content);
+		context.assertNotEquals(retLink.content.url, "");
+		console.log("-> onboarding url: " + retLink.content.url);
 
 		async.complete();
 	}

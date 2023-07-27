@@ -1,3 +1,7 @@
 {
-	"secret_key": "sk_test_"
+	"secret_key": "sk_test_",
+	"connect": {
+		"refresh_url": "https://example.com/reauth",
+		"return_url": "https://example.com/return"
+	}
 }
