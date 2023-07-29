@@ -1,7 +1,7 @@
 {
 	"name": "es4x-sdk-stripe",
 	"displayName": "ES4X Stripe SDK",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Stripe SDK for the ES4X Runtime.",
 	"main": "index.js",
 	"keywords": ["es4x", "javascript", "vertex", "stripe", "payment"],

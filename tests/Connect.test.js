@@ -62,4 +62,33 @@ suite.test("StripeAPI.connect_createAccount", async function (context) {
 	}
 });
 
+suite.test("StripeAPI.connect_createAccount", async function (context) {
+
+	let async = context.async();
+
+	try
+	{
+		// create the new STRIPE Api object
+		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+
+		// generate login link
+		let	accountId = "acct_1NYeisQ2li0b1S5Y";
+		let	loginLink = await stripeApi.connect_createLoginLink(accountId);
+
+		context.assertNotNull(loginLink);
+		context.assertEquals(loginLink.statusCode, 200);
+		context.assertNotNull(loginLink.content);
+		context.assertNotEquals(loginLink.content.url, "");
+		console.log("-> login url: " + loginLink.content.url);
+
+
+		async.complete();
+	}
+	catch(e)
+	{
+		console.trace(e);
+		async.complete();
+	}
+});
+
 suite.run();

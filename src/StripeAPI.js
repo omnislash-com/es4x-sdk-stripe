@@ -97,6 +97,17 @@ class	StripeAPI
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);		
 	}
 
+	// connected account: create login link
+	// doc: https://stripe.com/docs/connect/integrate-express-dashboard#create-login-link
+	async	connect_createLoginLink(_id, _secretKey = "")
+	{
+		// prepare the data
+		let	path = "/accounts/" + _id + "/login_links";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, null, _secretKey);		
+	}
+
 }
 
 module.exports = {
