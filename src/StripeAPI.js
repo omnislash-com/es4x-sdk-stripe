@@ -43,8 +43,12 @@ class	StripeAPI
 		let	dataToSend = null;
 		if (_data != null)
 		{
-			dataToSend = ObjUtils.SerializeObject(_data, "&", "=");
-			console.log(dataToSend);
+			// first we flatten it
+			let	flattenObj = ObjUtils.Flatten(_data, false, true, "", false, true, true);
+			console.log(flattenObj);
+			
+			// serialize it
+			dataToSend = ObjUtils.SerializeObject(flattenObj);
 		}
 
 		// add the version to the path
@@ -106,6 +110,78 @@ class	StripeAPI
 
 		// perform the query
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, null, _secretKey);		
+	}
+
+	// create a Checkout session
+	// doc: https://stripe.com/docs/api/checkout/sessions/create
+	// - structure of each item:
+	// -- name
+	// -- price
+	// -- quantity (optional, defaut 1)
+	// -- description (optional)
+	// -- metadata (optional)
+	async	checkout_createPaymentSession(_id, _items, _serviceFee, _successUrl, _orderDescription = null, _customerEmail = null, _customerId = null, _cancelUrl = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "")
+	{
+		// prepare the data
+		let	data = {
+			line_items: StripeAPI.PrepareLineItems(_items, _currency),
+			mode: "payment",
+			success_url: _successUrl,
+			cancel_url: _cancelUrl,
+			client_reference_id: _internalId,
+			currency: _currency,
+			customer: _customerId,
+			customer_email: _customerEmail,
+			metadata: _metaData,
+			payment_intent_data: {
+				description: _orderDescription,
+				metadata: _metaData,
+				application_fee_amount: _serviceFee,
+				transfer_data: {
+					destination: _id
+				}
+			},
+		};
+
+		let	path = "/checkout/sessions";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);		
+	}
+
+	static	PrepareLineItems(_items, _currency)
+	{
+		let	finalItems = [];
+		for(let item of _items)
+		{
+			finalItems.push(StripeAPI.PrepareLineItem(item, _currency));
+		}
+		return finalItems;
+	}
+
+	// - structure of each item:
+	// -- name
+	// -- price
+	// -- quantity (optional, defaut 1)
+	// -- description (optional)
+	// -- metadata (optional)
+	static	PrepareLineItem(_item, _currency)
+	{
+		let	newItem = {
+			price_data: {
+				currency: _currency,
+				product_data: {
+					name: ObjUtils.GetValueToString(_item, "name", "Item"),
+					description: ObjUtils.GetValue(_item, "description"),
+					metadata: ObjUtils.GetValue(_item, "metadata"),
+				},
+				unit_amount: ObjUtils.GetValueToInt(_item, "price")
+			},
+			quantity: ObjUtils.GetValueToInt(_item, "quantity", 1)
+
+		};
+
+		return newItem;
 	}
 
 }

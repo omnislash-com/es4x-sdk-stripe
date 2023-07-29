@@ -16,3 +16,9 @@ For now just add the Github url to your dependencies in the **package.json** fil
 	"es4x-sdk-stripe": "git+https://github.com/omnislash-com/es4x-sdk-stripe.git#main"
 }
 ```
+
+# Maintenance
+Update ES4X Utils:
+```bash
+npm run update:helpers
+```
