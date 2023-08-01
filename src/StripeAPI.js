@@ -190,6 +190,24 @@ class	StripeAPI
 		return newItem;
 	}
 
+	// Create a customer
+	// doc: https://stripe.com/docs/api/customers/create
+	async	customer_create(_metaData = null, _email = null, _name = null, _description = null, _secretKey = "")
+	{
+		// prepare the data
+		let	data = {
+			metadata: _metaData,
+			email: _email,
+			name: _name,
+			description: _description
+		};
+
+		let	path = "/customers";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);			
+	}
+
 }
 
 module.exports = {
