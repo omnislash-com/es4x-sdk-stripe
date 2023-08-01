@@ -127,14 +127,14 @@ class	StripeAPI
 			line_items: StripeAPI.PrepareLineItems(_items, _currency),
 			mode: "payment",
 			success_url: _successUrl,
-			cancel_url: _cancelUrl,
+			cancel_url: StringUtils.IsEmpty(_cancelUrl) ? null : _cancelUrl,
 			client_reference_id: _internalId,
 			currency: _currency,
-			customer: _customerId,
+			customer: StringUtils.IsEmpty(_customerId) ? null : _customerId,
 			customer_email: StringUtils.IsEmpty(_customerId) ? _customerEmail : null,
 			metadata: _metaData,
 			payment_intent_data: {
-				description: _orderDescription,
+				description: StringUtils.IsEmpty(_orderDescription) ? null : _orderDescription,
 				metadata: _metaData,
 				application_fee_amount: _serviceFee,
 				transfer_data: {
@@ -197,9 +197,9 @@ class	StripeAPI
 		// prepare the data
 		let	data = {
 			metadata: _metaData,
-			email: _email,
+			email: StringUtils.IsEmpty(_email) ? null : _email,
 			name: _name,
-			description: _description
+			description: StringUtils.IsEmpty(_description) ? null : _description,
 		};
 
 		let	path = "/customers";
