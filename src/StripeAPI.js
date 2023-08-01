@@ -120,7 +120,7 @@ class	StripeAPI
 	// -- quantity (optional, defaut 1)
 	// -- description (optional)
 	// -- metadata (optional)
-	async	checkout_createPaymentSession(_id, _items, _serviceFee, _successUrl, _orderDescription = null, _customerEmail = null, _customerId = null, _cancelUrl = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "")
+	async	checkout_createPaymentSession(_id, _items, _serviceFee, _successUrl, _orderDescription = null, _customerEmail = null, _customerId = null, _cancelUrl = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "", _savePayment = true)
 	{
 		// prepare the data
 		let	data = {
@@ -142,6 +142,12 @@ class	StripeAPI
 				}
 			},
 		};
+
+		// save payment?
+		if (_savePayment == true)
+		{
+			data.payment_intent_data["setup_future_usage"] = "off_session";
+		}
 
 		let	path = "/checkout/sessions";
 
