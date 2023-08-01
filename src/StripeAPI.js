@@ -208,6 +208,49 @@ class	StripeAPI
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);			
 	}
 
+	// doc: https://stripe.com/docs/webhooks#verify-manually
+	static	VerifySignature(_signature, _data, _key, _test = false)
+	{
+		// Split the signature with ,
+		let	chunks = _signature.split(",");
+
+		// find the timestamp and the scheme
+		let	timestamp = "";
+		let	scheme = "";
+		let	schemeId = _test ? "v0" : "v1";
+		for(let chunk of chunks)
+		{
+			// split with =
+			let	subChunks = chunk.split("=");
+
+			if (subChunks.length == 2)
+			{
+				// timestamp?
+				if (subChunks[0] == "t")
+					timestamp = subChunks[1];
+				// scheme?
+				else if (subChunks[0] == schemeId)
+					scheme = subChunks[1];
+			}
+		}
+
+		// not found
+		if ( (StringUtils.IsEmpty(timestamp) == true) || (StringUtils.IsEmpty(scheme) == true) )
+			return false;
+
+		// create the payload
+		let	payload = timestamp + "." + JSON.stringify(_data);
+
+		// hash the payload
+		let	payloadHash = StringUtils.HMACSHA256(_key, payload);
+
+		console.log("Timestamp = " + timestamp);
+		console.log("Payload = " + payload);
+		console.log("Calculated: " + payloadHash);
+		console.log("VS " + scheme);
+
+		return payloadHash == scheme;
+	}
 }
 
 module.exports = {

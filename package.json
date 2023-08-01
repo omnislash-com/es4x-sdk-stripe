@@ -35,6 +35,7 @@
 		"test:Connect": "es4x test tests/Connect.test.js",
 		"test:Checkout": "es4x test tests/Checkout.test.js",
 		"test:Customer": "es4x test tests/Customer.test.js",
+		"test:Utils": "es4x test tests/Utils.test.js",
 		"update:helpers": "npm install git+https://github.com/omnislash-com/es4x-utils.git#main"
 	}
 }
