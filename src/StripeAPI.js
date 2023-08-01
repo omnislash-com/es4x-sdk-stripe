@@ -131,7 +131,7 @@ class	StripeAPI
 			client_reference_id: _internalId,
 			currency: _currency,
 			customer: _customerId,
-			customer_email: _customerEmail,
+			customer_email: StringUtils.IsEmpty(_customerId) ? _customerEmail : null,
 			metadata: _metaData,
 			payment_intent_data: {
 				description: _orderDescription,
