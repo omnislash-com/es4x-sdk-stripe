@@ -122,6 +122,8 @@ class	StripeAPI
 	// -- metadata (optional)
 	async	checkout_createPaymentSession(_id, _items, _serviceFee, _successUrl, _orderDescription = null, _customerEmail = null, _customerId = null, _cancelUrl = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "", _savePayment = true)
 	{
+		_customerEmail = StringUtils.IsEmpty(_customerEmail) ? null : _customerEmail;
+
 		// prepare the data
 		let	data = {
 			line_items: StripeAPI.PrepareLineItems(_items, _currency),
@@ -132,6 +134,7 @@ class	StripeAPI
 			currency: _currency,
 			customer: StringUtils.IsEmpty(_customerId) ? null : _customerId,
 			customer_email: StringUtils.IsEmpty(_customerId) ? _customerEmail : null,
+			customer_creation: StringUtils.IsEmpty(_customerId) ? "always" : null,
 			metadata: _metaData,
 			payment_intent_data: {
 				description: StringUtils.IsEmpty(_orderDescription) ? null : _orderDescription,
