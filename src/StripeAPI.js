@@ -166,6 +166,8 @@ class	StripeAPI
 
 		// retrieve the payment id
 		let	paymentId = await this.customer_getPaymentMethodIdForOffSession(_customerId, _secretKey);
+		if (StringUtils.IsEmpty(paymentId) == true)
+			return null;
 
 		// prepare the data
 		let	data = {
