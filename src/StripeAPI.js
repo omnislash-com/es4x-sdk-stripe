@@ -3,6 +3,7 @@ import { LogUtils } from 'es4x-utils/src/utils/LogUtils';
 import { WebClientMgr } from 'es4x-utils/src/network/WebClientMgr';
 import { QueryUtils } from 'es4x-utils/src/network/QueryUtils';
 import { StringUtils } from 'es4x-utils/src/utils/StringUtils';
+import { ArrayUtils } from 'es4x-utils/src/utils/ArrayUtils';
 
 class	StripeAPI
 {
@@ -133,7 +134,7 @@ class	StripeAPI
 			client_reference_id: _internalId,
 			currency: _currency,
 			customer: StringUtils.IsEmpty(_customerId) ? null : _customerId,
-			customer_email: StringUtils.IsEmpty(_customerId) ? _customerEmail : null,
+			customer_email: StringUtils.IsEmpty(_customerEmail) ? _customerEmail : null,
 			customer_creation: StringUtils.IsEmpty(_customerId) ? "always" : null,
 			metadata: _metaData,
 			payment_intent_data: {
@@ -156,6 +157,38 @@ class	StripeAPI
 
 		// perform the query
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);		
+	}
+
+	// https://stripe.com/docs/api/payment_intents/create
+	async	paymentIntent_createAndConfirm(_id, _amount, _serviceFee, _customerId, _orderDescription = null, _customerEmail = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "")
+	{
+		_customerEmail = StringUtils.IsEmpty(_customerEmail) ? null : _customerEmail;
+
+		// retrieve the payment id
+		let	paymentId = await this.customer_getPaymentMethodIdForOffSession(_customerId, _secretKey);
+
+		// prepare the data
+		let	data = {
+			amount: _amount,
+			currency: _currency,
+			confirm: true,
+			customer: _customerId,
+			description: StringUtils.IsEmpty(_orderDescription) ? null : _orderDescription,
+			metadata: _metaData,
+			off_session: true,
+			payment_method: paymentId,
+			receipt_email: StringUtils.IsEmpty(_customerEmail) ? _customerEmail : null,
+			application_fee_amount: _serviceFee,
+			transfer_data: {
+				destination: _id
+			},
+//			client_reference_id: _internalId,
+		};
+
+		let	path = "/payment_intents";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);				
 	}
 
 	static	PrepareLineItems(_items, _currency)
@@ -209,6 +242,44 @@ class	StripeAPI
 
 		// perform the query
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);			
+	}
+
+	// Gets the customer
+	// doc: https://stripe.com/docs/api/customers/retrieve
+	async	customer_get(_customerId, _secretKey = "")
+	{
+		let	path = "/customers/" + _customerId;
+
+		return await this.query(QueryUtils.HTTP_METHOD_GET, path, _secretKey);
+	}
+
+	// List payment methods
+	// doc: https://stripe.com/docs/api/payment_methods/customer_list
+	async	customer_listPaymentMethods(_customerId, _secretKey = "")
+	{
+		let	path = "/customers/" + _customerId + "/payment_methods";
+
+		return await this.query(QueryUtils.HTTP_METHOD_GET, path, _secretKey);
+	}
+
+	async	customer_getPaymentMethodIdForOffSession(_customerId, _secretKey = "")
+	{
+		// get the customer info
+		let	customerInfo = await this.customer_get(_customerId, _secretKey);
+
+		// do we have a default source?
+		let	defaultPaymentId = ObjUtils.GetValueToString(customerInfo, "content.default_source");
+		if (StringUtils.IsEmpty(defaultPaymentId) == false)
+			return defaultPaymentId;
+
+		// get the list of payment method
+		let	methodsRet = await this.customer_listPaymentMethods(_customerId, _secretKey);
+
+		// get the list of methods
+		let	allMethods = ObjUtils.GetValue(methodsRet, "content.data", []);
+
+		// return the id of the first one
+		return ObjUtils.GetValueToString(allMethods, "[0].id");
 	}
 
 	// doc: https://stripe.com/docs/webhooks#verify-manually

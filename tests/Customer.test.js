@@ -47,4 +47,85 @@ suite.test("StripeAPI.customer_create", async function (context) {
 	}
 });
 
+
+suite.test("StripeAPI.customer_get", async function (context) {
+
+	let async = context.async();
+
+	try
+	{
+		// create the new STRIPE Api object
+		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+
+		// get the list of payment methods
+		let	customerId = "cus_ONY27zDlOdmaaD";
+
+		let	info = await stripeApi.customer_get(customerId);
+
+		context.assertNotNull(info);
+
+		async.complete();
+	}
+	catch(e)
+	{
+		console.trace(e);
+		async.complete();
+	}
+});
+
+suite.test("StripeAPI.customer_listPaymentMethods", async function (context) {
+
+	let async = context.async();
+
+	try
+	{
+		// create the new STRIPE Api object
+		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+
+		// get the list of payment methods
+		let	customerId = "cus_ONY27zDlOdmaaD";
+
+		let	info = await stripeApi.customer_listPaymentMethods(customerId);
+
+		context.assertNotNull(info);
+
+		// get the list
+		let	cards = ObjUtils.GetValue(info, "content.data", []);
+		context.assertTrue(cards.length > 0);
+
+		async.complete();
+	}
+	catch(e)
+	{
+		console.trace(e);
+		async.complete();
+	}
+});
+
+suite.test("StripeAPI.customer_getPaymentMethodIdForOffSession", async function (context) {
+
+	let async = context.async();
+
+	try
+	{
+		// create the new STRIPE Api object
+		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+
+		// get the list of payment methods
+		let	customerId = "cus_ONY27zDlOdmaaD";
+
+		let	paymentId = await stripeApi.customer_getPaymentMethodIdForOffSession(customerId);
+
+		context.assertNotEquals(paymentId, "");
+		console.log("Payment id => " + paymentId);
+
+		async.complete();
+	}
+	catch(e)
+	{
+		console.trace(e);
+		async.complete();
+	}
+});
+
 suite.run();
