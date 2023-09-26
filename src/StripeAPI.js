@@ -252,7 +252,7 @@ class	StripeAPI
 	{
 		let	path = "/customers/" + _customerId;
 
-		return await this.query(QueryUtils.HTTP_METHOD_GET, path, _secretKey);
+		return await this.query(QueryUtils.HTTP_METHOD_GET, path, null, _secretKey);
 	}
 
 	// List payment methods
@@ -261,7 +261,7 @@ class	StripeAPI
 	{
 		let	path = "/customers/" + _customerId + "/payment_methods";
 
-		return await this.query(QueryUtils.HTTP_METHOD_GET, path, _secretKey);
+		return await this.query(QueryUtils.HTTP_METHOD_GET, path, null, _secretKey);
 	}
 
 	async	customer_getPaymentMethodIdForOffSession(_customerId, _secretKey = "")
