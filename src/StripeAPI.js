@@ -145,6 +145,7 @@ class	StripeAPI
 					destination: _id
 				}
 			},
+			allow_promotion_codes: true,
 		};
 
 		// save payment?
