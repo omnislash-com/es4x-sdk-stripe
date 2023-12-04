@@ -33,8 +33,10 @@ suite.test("StripeAPI.paymentIntent_createAndConfirm", async function (context) 
 			confirmation_number: "aaaaa",
 			root_id: 1
 		};
+		let	skipTransfer = true;
+		let	transferGroup = "TESTGROUP2";
 
-		let	paymentIntent = await stripeApi.paymentIntent_createAndConfirm(accountId, amount, serviceFee, customerId, orderDescription, customerEmail, internalId, metadata);
+		let	paymentIntent = await stripeApi.paymentIntent_createAndConfirm(accountId, amount, serviceFee, customerId, orderDescription, customerEmail, internalId, metadata, "usd", "", skipTransfer, transferGroup);
 
 		console.log(paymentIntent);
 
