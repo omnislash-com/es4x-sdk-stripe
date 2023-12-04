@@ -36,6 +36,7 @@
 		"test:Checkout": "es4x test tests/Checkout.test.js",
 		"test:Customer": "es4x test tests/Customer.test.js",
 		"test:PaymentIntent": "es4x test tests/PaymentIntent.test.js",
+		"test:Transfer": "es4x test tests/Transfer.test.js",
 		"test:Utils": "es4x test tests/Utils.test.js",
 		"update:helpers": "npm install git+https://github.com/omnislash-com/es4x-utils.git#main"
 	}

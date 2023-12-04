@@ -310,6 +310,26 @@ class	StripeAPI
 		return ObjUtils.GetValueToString(allMethods, "[0].id");
 	}
 
+	// create a new transfer
+	// doc: https://stripe.com/docs/api/transfers/create
+	async	transfer_create(_destinationId, _amount, _description = "", _transferGroup = "", _metaData = null, _currency = "usd", _secretKey = "")
+	{
+		// prepare the data
+		let	data = {
+			amount: _amount,
+			currency: _currency,
+			destination: _destinationId,
+			description: StringUtils.IsEmpty(_description) ? null : _description,
+			metadata: _metaData,
+			transfer_group: StringUtils.IsEmpty(_transferGroup) ? null : _transferGroup
+		};
+
+		let	path = "/transfers";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);			
+	}
+
 	// doc: https://stripe.com/docs/webhooks#verify-manually
 	static	VerifySignature(_signature, _data, _key, _test = false)
 	{
