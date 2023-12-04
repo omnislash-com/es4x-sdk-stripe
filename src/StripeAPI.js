@@ -174,6 +174,17 @@ class	StripeAPI
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);		
 	}
 
+	// get total details breakdown: read
+	// doc: https://stripe.com/docs/api/checkout/sessions/object#checkout_session_object-total_details-breakdown-discounts
+	async	checkout_getTotalBreakdownDetails(_id, _secretKey = "")
+	{
+		let	path = "/checkout/sessions/" + _id + "?expand[]=total_details.breakdown";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_GET, path, null, _secretKey);
+	}
+
+
 	// https://stripe.com/docs/api/payment_intents/create
 	async	paymentIntent_createAndConfirm(_id, _amount, _serviceFee, _customerId, _orderDescription = null, _customerEmail = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "", _skipTransfer = false, _transferGroup = "")
 	{
@@ -372,6 +383,22 @@ class	StripeAPI
 		console.log("VS " + scheme);
 
 		return payloadHash == scheme;
+	}
+
+	// doc: https://stripe.com/docs/api/coupons/retrieve
+	async	coupon_findCoupon(_id, _secretKey = "")
+	{
+		let	path = "/coupons/" + _id;
+
+		return await this.query(QueryUtils.HTTP_METHOD_GET, path, null, _secretKey);
+	}
+
+	// doc: https://stripe.com/docs/api/promotion_codes/retrieve
+	async	promotionCode_findPromotionCode(_id, _secretKey = "")
+	{
+		let	path = "/promotion_codes/" + _id ;
+
+		return await this.query(QueryUtils.HTTP_METHOD_GET, path, null, _secretKey);
 	}
 }
 
