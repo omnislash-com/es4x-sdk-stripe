@@ -121,7 +121,10 @@ class	StripeAPI
 	// -- quantity (optional, defaut 1)
 	// -- description (optional)
 	// -- metadata (optional)
-	async	checkout_createPaymentSession(_id, _items, _serviceFee, _successUrl, _orderDescription = null, _customerEmail = null, _customerId = null, _cancelUrl = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "", _savePayment = true)
+	// doc about splitting charge and transfers:
+	// - https://stripe.com/docs/connect/separate-charges-and-transfers
+	// - https://stripe.com/docs/api/transfers/create
+	async	checkout_createPaymentSession(_id, _items, _serviceFee, _successUrl, _orderDescription = null, _customerEmail = null, _customerId = null, _cancelUrl = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "", _savePayment = true, _skipTransfer = false, _transferGroup = "")
 	{
 		_customerEmail = StringUtils.IsEmpty(_customerEmail) ? null : _customerEmail;
 
@@ -139,14 +142,25 @@ class	StripeAPI
 			metadata: _metaData,
 			payment_intent_data: {
 				description: StringUtils.IsEmpty(_orderDescription) ? null : _orderDescription,
-				metadata: _metaData,
-				application_fee_amount: _serviceFee,
-				transfer_data: {
-					destination: _id
-				}
+				metadata: _metaData
 			},
 			allow_promotion_codes: true,
 		};
+
+		// transfer?
+		if (_skipTransfer == false)
+		{
+			data.payment_intent_data["application_fee_amount"] = _serviceFee;
+			data.payment_intent_data["transfer_data"] = {
+				destination: _id
+			};
+		}
+
+		// transfer group?
+		if (StringUtils.IsEmpty(_transferGroup) == false)
+		{
+			data.payment_intent_data["transfer_group"] = _transferGroup;
+		}
 
 		// save payment?
 		if (_savePayment == true)
@@ -161,7 +175,7 @@ class	StripeAPI
 	}
 
 	// https://stripe.com/docs/api/payment_intents/create
-	async	paymentIntent_createAndConfirm(_id, _amount, _serviceFee, _customerId, _orderDescription = null, _customerEmail = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "")
+	async	paymentIntent_createAndConfirm(_id, _amount, _serviceFee, _customerId, _orderDescription = null, _customerEmail = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "", _skipTransfer = false, _transferGroup = "")
 	{
 		_customerEmail = StringUtils.IsEmpty(_customerEmail) ? null : _customerEmail;
 
@@ -181,12 +195,23 @@ class	StripeAPI
 			off_session: true,
 			payment_method: paymentId,
 			receipt_email: StringUtils.IsEmpty(_customerEmail) ? _customerEmail : null,
-			application_fee_amount: _serviceFee,
-			transfer_data: {
-				destination: _id
-			},
 //			client_reference_id: _internalId,
 		};
+
+		// transfer?
+		if (_skipTransfer == false)
+		{
+			data["application_fee_amount"] = _serviceFee;
+			data["transfer_data"] = {
+				destination: _id
+			};
+		}
+
+		// transfer group?
+		if (StringUtils.IsEmpty(_transferGroup) == false)
+		{
+			data["transfer_group"] = _transferGroup;
+		}
 
 		let	path = "/payment_intents";
 

@@ -50,8 +50,10 @@ suite.test("StripeAPI.checkout_createPaymentSession", async function (context) {
 			confirmation_number: "aaaaa",
 			root_id: 1
 		};
+		let	skipTransfer = true;
+		let	transferGroup = "TESTGROUP";
 
-		let	sessionInfo = await stripeApi.checkout_createPaymentSession(accountId, items, serviceFee, successUrl, orderDescription, customerEmail, customerId, cancelUrl, internalId, metadata);
+		let	sessionInfo = await stripeApi.checkout_createPaymentSession(accountId, items, serviceFee, successUrl, orderDescription, customerEmail, customerId, cancelUrl, internalId, metadata, "usd", "", true, skipTransfer, transferGroup);
 
 		context.assertNotNull(sessionInfo);
 		context.assertEquals(sessionInfo.statusCode, 200);
