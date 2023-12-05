@@ -40,8 +40,23 @@ suite.test("StripeAPI.paymentIntent_createAndConfirm", async function (context) 
 
 		console.log(paymentIntent);
 
-
 		context.assertNotNull(paymentIntent);
+		context.assertEquals(paymentIntent.statusCode, 200);
+
+		// retrieve the id
+		let	paymentIntentId = ObjUtils.GetValueToString(paymentIntent, "content.id");
+		console.log("ID = " + paymentIntentId);
+
+		// let's try to get it and its last charge
+		let	lastCharge = await stripeApi.paymentIntent_getLastCharge(paymentIntentId);
+		console.log("LAST CHARGE = " + lastCharge);
+
+		context.assertEquals(StringUtils.IsEmpty(lastCharge), false);
+
+		// do the transfer
+		let	transferInfo = await stripeApi.transfer_create(accountId, serviceFee, "Test transfer", transferGroup, metadata, "usd", "", lastCharge);
+		context.assertNotNull(transferInfo);
+		context.assertEquals(transferInfo.statusCode, 200);
 
 		async.complete();
 	}

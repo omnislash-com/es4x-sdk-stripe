@@ -230,6 +230,25 @@ class	StripeAPI
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);				
 	}
 
+	// retrieve payment intent
+	// doc: https://stripe.com/docs/api/payment_intents/retrieve?lang=curl
+	async	paymentIntent_retrieve(_id, _secretKey = "")
+	{
+		let	path = "/payment_intents/" + _id;
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_GET, path, null, _secretKey);
+	}
+
+	async	paymentIntent_getLastCharge(_id, _secretKey = "")
+	{
+		// retrieve it
+		let	paymentIntentInfo = await this.paymentIntent_retrieve(_id, _secretKey);
+
+		// find the last charge id
+		return ObjUtils.GetValueToString(paymentIntentInfo, "content.latest_charge");
+	}
+
 	static	PrepareLineItems(_items, _currency)
 	{
 		let	finalItems = [];
@@ -323,7 +342,7 @@ class	StripeAPI
 
 	// create a new transfer
 	// doc: https://stripe.com/docs/api/transfers/create
-	async	transfer_create(_destinationId, _amount, _description = "", _transferGroup = "", _metaData = null, _currency = "usd", _secretKey = "")
+	async	transfer_create(_destinationId, _amount, _description = "", _transferGroup = "", _metaData = null, _currency = "usd", _secretKey = "", _sourceTransaction = "")
 	{
 		// prepare the data
 		let	data = {
@@ -332,7 +351,8 @@ class	StripeAPI
 			destination: _destinationId,
 			description: StringUtils.IsEmpty(_description) ? null : _description,
 			metadata: _metaData,
-			transfer_group: StringUtils.IsEmpty(_transferGroup) ? null : _transferGroup
+			transfer_group: StringUtils.IsEmpty(_transferGroup) ? null : _transferGroup,
+			source_transaction: StringUtils.IsEmpty(_sourceTransaction) ? null : _sourceTransaction
 		};
 
 		let	path = "/transfers";
