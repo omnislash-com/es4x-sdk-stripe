@@ -184,6 +184,24 @@ class	StripeAPI
 		return await this.query(QueryUtils.HTTP_METHOD_GET, path, null, _secretKey);
 	}
 
+	// get coupon info
+	async checkout_getCouponInfo(_id, _secretKey = "")
+	{
+		let totalBreakdownDetails = await this.checkout_getTotalBreakdownDetails(_id, _secretKey)
+		
+		if (totalBreakdownDetails.content) 
+		{
+			let data = {
+				coupon_id: ObjUtils.GetValueToString(totalBreakdownDetails, "content.total_details.breakdown.discounts[0].discount.coupon.id"),
+				coupon_promo_id: ObjUtils.GetValueToString(totalBreakdownDetails, "content.total_details.breakdown.discounts[0].discount.promotion_code"),
+				coupon_amount: ObjUtils.GetValueToInt(totalBreakdownDetails, "content.total_details.amount_discount")
+			}
+
+			return data
+		}
+
+		return null
+	}
 
 	// https://stripe.com/docs/api/payment_intents/create
 	async	paymentIntent_createAndConfirm(_id, _amount, _serviceFee, _customerId, _orderDescription = null, _customerEmail = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "", _skipTransfer = false, _transferGroup = "")

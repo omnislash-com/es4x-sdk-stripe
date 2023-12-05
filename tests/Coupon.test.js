@@ -24,8 +24,6 @@ suite.test("StripeAPI.coupon_findCoupon", async function (context) {
 		// do the query
 		let	coupon = await stripeApi.coupon_findCoupon(id);
 
-		console.log(coupon)
-
 		// check the response
 		context.assertNotNull(coupon);
 		context.assertEquals(coupon.statusCode, 200);

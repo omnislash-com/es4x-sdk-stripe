@@ -84,14 +84,41 @@ suite.test("StripeAPI.checkout_getTotalBreakdownDetails", async function (contex
 		// do the query
 		let	data = await stripeApi.checkout_getTotalBreakdownDetails(id);
 
-		console.log(data)
-
 		// check the response
 		context.assertNotNull(data);
 		context.assertEquals(data.statusCode, 200);
 		context.assertNotNull(data.content);
 		context.assertTrue(data.content.total_details.breakdown.discounts.length === 1);
 		console.log("-> account read: " + data.content.id);
+		async.complete();
+	}
+	catch(e)
+	{
+		console.trace(e);
+		async.complete();
+	}
+});
+
+suite.test("StripeAPI.checkout_getCouponInfo", async function (context) {
+
+	let async = context.async();
+
+	try
+	{
+		// create the new STRIPE Api object
+		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+
+		const id = 'cs_test_b1phSHQ6SVSS9VCxpejkVedmPclOZ0l3YrdsMc97cDVuldDFE4LNLV1ZAK'
+
+		// do the query
+		let	couponInfo = await stripeApi.checkout_getCouponInfo(id);
+
+		// check the response
+		context.assertNotNull(couponInfo);
+		context.assertEquals(couponInfo.coupon_amount, 16580);
+		context.assertEquals(couponInfo.coupon_id, "MOdzwUsm");
+		context.assertEquals(couponInfo.coupon_promo_id, "promo_1OJfprLioETkVPjcXxE3jERY");
+		console.log("-> got coupon id: " + couponInfo.coupon_id);
 		async.complete();
 	}
 	catch(e)
