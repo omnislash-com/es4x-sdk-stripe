@@ -189,7 +189,7 @@ class	StripeAPI
 	{
 		let totalBreakdownDetails = await this.checkout_getTotalBreakdownDetails(_id, _secretKey)
 		
-		if (totalBreakdownDetails.content) 
+		if (totalBreakdownDetails.content && ObjUtils.GetValueToInt(totalBreakdownDetails, "content.total_details.amount_discount")) 
 		{
 			let data = {
 				coupon_id: ObjUtils.GetValueToString(totalBreakdownDetails, "content.total_details.breakdown.discounts[0].discount.coupon.id"),
