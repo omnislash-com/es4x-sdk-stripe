@@ -379,6 +379,24 @@ class	StripeAPI
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);			
 	}
 
+	// Transfer revesal
+	// doc: https://stripe.com/docs/api/transfer_reversals
+	async	transfer_reversal(_id, _amount, _description = "", _transferGroup = "", _metaData = null, _secretKey = "")
+	{
+		// prepare the data
+		let	data = {
+			amount: _amount,
+			description: StringUtils.IsEmpty(_description) ? null : _description,
+			metadata: _metaData,
+			transfer_group: StringUtils.IsEmpty(_transferGroup) ? null : _transferGroup,
+		};
+
+		let	path = "/transfers/" + _id + "/reversals";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);			
+	}
+
 	// doc: https://stripe.com/docs/webhooks#verify-manually
 	static	VerifySignature(_signature, _data, _key, _test = false)
 	{
@@ -437,6 +455,22 @@ class	StripeAPI
 		let	path = "/promotion_codes/" + _id ;
 
 		return await this.query(QueryUtils.HTTP_METHOD_GET, path, null, _secretKey);
+	}
+
+	// Create a refund
+	// doc: https://stripe.com/docs/api/refunds/create
+	async	refund_create(_id, _amount = null, _secretKey = "")
+	{
+		// prepare the data
+		let	data = {
+			payment_intent: _id,
+			amount: _amount
+		};
+
+		let	path = "/refunds";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);			
 	}
 }
 
