@@ -381,14 +381,13 @@ class	StripeAPI
 
 	// Transfer revesal
 	// doc: https://stripe.com/docs/api/transfer_reversals
-	async	transfer_reversal(_id, _amount, _description = "", _transferGroup = "", _metaData = null, _secretKey = "")
+	async	transfer_reversal(_id, _amount, _description = "", _metaData = null, _secretKey = "")
 	{
 		// prepare the data
 		let	data = {
 			amount: _amount,
 			description: StringUtils.IsEmpty(_description) ? null : _description,
 			metadata: _metaData,
-			transfer_group: StringUtils.IsEmpty(_transferGroup) ? null : _transferGroup,
 		};
 
 		let	path = "/transfers/" + _id + "/reversals";

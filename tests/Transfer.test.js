@@ -64,9 +64,8 @@ suite.test("StripeAPI.transfer_reversal", async function (context) {
 			confirmation_number: "aaaaa",
 			root_id: 1
 		};
-		let	transferGroup = "TESTGROUP2";
 
-		let	transferReversalInfo = await stripeApi.transfer_reversal(id, amount, transferGroup, metadata);
+		let	transferReversalInfo = await stripeApi.transfer_reversal(id, amount, metadata);
 
 		console.log(transferReversalInfo);
 
