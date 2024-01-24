@@ -11,41 +11,41 @@ const	config = require('./test_config.json');
 const suite = TestSuite.create("ES4X Test: Transfer");
 
 
-// suite.test("StripeAPI.transfer_create", async function (context) {
+suite.test("StripeAPI.transfer_create", async function (context) {
 
-// 	let async = context.async();
+	let async = context.async();
 
-// 	try
-// 	{
-// 		// create the new STRIPE Api object
-// 		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+	try
+	{
+		// create the new STRIPE Api object
+		let	stripeApi = new StripeAPI(vertx, config.secret_key);
 
-// 		// create the transfer
-// 		let	accountId = "acct_1NYeisQ2li0b1S5Y";
-// 		let	amount = 150;
-// 		let	description = null;
-// 		let	metadata = {
-// 			id: 3,
-// 			confirmation_number: "aaaaa",
-// 			root_id: 1
-// 		};
-// 		let	transferGroup = "TESTGROUP2";
+		// create the transfer
+		let	accountId = "acct_1NYeisQ2li0b1S5Y";
+		let	amount = 150;
+		let	description = null;
+		let	metadata = {
+			id: 3,
+			confirmation_number: "aaaaa",
+			root_id: 1
+		};
+		let	transferGroup = "TESTGROUP2";
 
-// 		let	transferInfo = await stripeApi.transfer_create(accountId, amount, description, transferGroup, metadata, "usd", "");
+		let	transferInfo = await stripeApi.transfer_create(accountId, amount, description, transferGroup, metadata, "usd", "");
 
-// 		console.log(transferInfo);
+		console.log(transferInfo);
 
-// 		context.assertNotNull(transferInfo);
-// 		context.assertEquals(transferInfo.statusCode, 200);
+		context.assertNotNull(transferInfo);
+		context.assertEquals(transferInfo.statusCode, 200);
 
-// 		async.complete();
-// 	}
-// 	catch(e)
-// 	{
-// 		console.trace(e);
-// 		async.complete();
-// 	}
-// });
+		async.complete();
+	}
+	catch(e)
+	{
+		console.trace(e);
+		async.complete();
+	}
+});
 
 suite.test("StripeAPI.transfer_reversal", async function (context) {
 
