@@ -415,8 +415,6 @@ class	StripeAPI
 
 		let updatedCustomerInfo = await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);
 
-		console.log({updatedCustomerInfo})
-
 		return updatedCustomerInfo;
 	}
 
