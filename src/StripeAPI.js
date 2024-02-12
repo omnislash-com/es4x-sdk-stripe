@@ -176,7 +176,7 @@ class	StripeAPI
 
 	// create a Checkout session setup to save a new payment method
 	// doc: https://stripe.com/docs/payments/save-and-reuse?platform=web&ui=checkout#set-up-stripe
-	async	checkout_createPaymentSessionSetup(_currency = "usd", _successUrl = "", _cancelUrl = null, _customerId = null, _secretKey = "")
+	async	checkout_createPaymentSessionSetup(_currency = "usd", _successUrl = "", _cancelUrl = null, _customerId = null, _metaData = null, _secretKey = "")
 	{
 		// prepare the data
 		let	data = {
@@ -185,6 +185,7 @@ class	StripeAPI
 			customer: StringUtils.IsEmpty(_cancelUrl) ? null : _customerId,
 			success_url: _successUrl,
 			cancel_url: StringUtils.IsEmpty(_cancelUrl) ? null : _cancelUrl,
+			metadata: _metaData
 		};
 
 		let	path = "/checkout/sessions";
