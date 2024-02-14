@@ -542,6 +542,24 @@ class	StripeAPI
 		// perform the query
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, null, _secretKey);
 	}
+
+
+	// STATIC METHODS
+	static 	extractPaymentMethodInfo(paymentMethod) 
+	{
+		return {
+		  id: paymentMethod.id,
+		  last4: paymentMethod.card.last4,
+		  customer_id: paymentMethod.customer,
+		  billing_details: paymentMethod.billing_details,
+		  card: {
+			brand: paymentMethod.card.brand,
+			funding: paymentMethod.card.funding,
+			exp_year: paymentMethod.card.exp_year,
+			exp_month: paymentMethod.card.exp_month
+		  },
+		};
+	}
 }
 
 module.exports = {
