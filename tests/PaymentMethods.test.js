@@ -20,7 +20,7 @@ suite.test("StripeAPI.paymentMethods_detach", async function (context) {
 		// create the new STRIPE Api object
 		let	stripeApi = new StripeAPI(vertx, config.secret_key);
 		
-        let	paymentId = "card_1Oi35ALioETkVPjcu2TaoqaQ";
+        let	paymentId = "pm_1Oj9APLioETkVPjcxHLqfCn7";
 
 		let	paymentMethodInfo = await stripeApi.paymentMethods_detach(paymentId);
 
