@@ -381,7 +381,7 @@ class	StripeAPI
 		let	customerInfo = await this.customer_get(_customerId, _secretKey);
 
 		// do we have a default source?
-		let	defaultPaymentId = ObjUtils.GetValueToString(customerInfo, "content.default_source");
+		let	defaultPaymentId = ObjUtils.GetValueToString(customerInfo, "content.invoice_settings.default_payment_method");
 		if (StringUtils.IsEmpty(defaultPaymentId) == false)
 			return defaultPaymentId;
 
@@ -535,7 +535,7 @@ class	StripeAPI
 
 	// Detach a payment menthod
 	// doc: https://stripe.com/docs/api/payment_methods/detach
-	async paymentMethods_detach(_paymentId, _secretKey = "")
+	async	paymentMethods_detach(_paymentId, _secretKey = "")
 	{
 		let path = "/payment_methods/" + _paymentId + "/detach"
 
@@ -545,18 +545,18 @@ class	StripeAPI
 
 
 	// STATIC METHODS
-	static 	extractPaymentMethodInfo(paymentMethod) 
+	static	extractPaymentMethodInfo(_paymentMethod) 
 	{
 		return {
-		  id: paymentMethod.id,
-		  last4: paymentMethod.card.last4,
-		  customer_id: paymentMethod.customer,
-		  billing_details: paymentMethod.billing_details,
+		  id: _paymentMethod.id,
+		  last4: _paymentMethod.card.last4,
+		  customer_id: _paymentMethod.customer,
+		  billing_details: _paymentMethod.billing_details,
 		  card: {
-			brand: paymentMethod.card.brand,
-			funding: paymentMethod.card.funding,
-			exp_year: paymentMethod.card.exp_year,
-			exp_month: paymentMethod.card.exp_month
+			brand: _paymentMethod.card.brand,
+			funding: _paymentMethod.card.funding,
+			exp_year: _paymentMethod.card.exp_year,
+			exp_month: _paymentMethod.card.exp_month
 		  },
 		};
 	}
