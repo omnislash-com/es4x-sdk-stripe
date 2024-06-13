@@ -174,6 +174,28 @@ class	StripeAPI
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);		
 	}
 
+	// only capture the payment method
+	// https://docs.stripe.com/payments/save-and-reuse
+	async	checkout_createCaptureSession(_successUrl, _customerEmail = null, _customerId = null, _cancelUrl = null, _currency = "usd", _secretKey = "")
+	{
+
+		// prepare the data
+		let	data = {
+			mode: "setup",
+			success_url: _successUrl,
+			cancel_url: StringUtils.IsEmpty(_cancelUrl) ? null : _cancelUrl,
+			currency: _currency,
+			customer: StringUtils.IsEmpty(_customerId) ? null : _customerId,
+			customer_email: StringUtils.IsEmpty(_customerEmail) ? _customerEmail : null,
+			customer_creation: StringUtils.IsEmpty(_customerId) ? "always" : null,
+		};
+
+		let	path = "/checkout/sessions";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);		
+	}
+
 	// get total details breakdown: read
 	// doc: https://stripe.com/docs/api/checkout/sessions/object#checkout_session_object-total_details-breakdown-discounts
 	async	checkout_getTotalBreakdownDetails(_id, _secretKey = "")

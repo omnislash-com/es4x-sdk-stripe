@@ -101,4 +101,36 @@ suite.test("StripeAPI.checkout_getTotalBreakdownDetails", async function (contex
 	}
 });
 
+suite.test("StripeAPI.checkout_createCaptureSession", async function (context) {
+
+	let async = context.async();
+
+	try
+	{
+		// create the new STRIPE Api object
+		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+
+		// create the payment session
+		let	successUrl = "https://example.com/success";
+		let	cancelUrl = "https://example.com/cancel";
+		let	customerEmail = "mike.jegat@gmail.com";
+		let	customerId = null;
+
+		let	sessionInfo = await stripeApi.checkout_createCaptureSession(successUrl, customerEmail, customerId, cancelUrl);
+
+		context.assertNotNull(sessionInfo);
+		context.assertEquals(sessionInfo.statusCode, 200);
+		context.assertNotNull(sessionInfo.content);
+		context.assertNotEquals(sessionInfo.content.url, "");
+		console.log("-> session url: " + sessionInfo.content.url);
+
+		async.complete();
+	}
+	catch(e)
+	{
+		console.trace(e);
+		async.complete();
+	}
+});
+
 suite.run();
