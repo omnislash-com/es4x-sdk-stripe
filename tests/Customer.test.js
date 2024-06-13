@@ -57,10 +57,11 @@ suite.test("StripeAPI.customer_get", async function (context) {
 		// create the new STRIPE Api object
 		let	stripeApi = new StripeAPI(vertx, config.secret_key);
 
-		// get the list of payment methods
-		let	customerId = "cus_ONY27zDlOdmaaD";
+		let	customerId = "cus_ORiKWvjKWnyxlI";
 
 		let	info = await stripeApi.customer_get(customerId);
+
+		console.log({info})
 
 		context.assertNotNull(info);
 
@@ -81,17 +82,22 @@ suite.test("StripeAPI.customer_listPaymentMethods", async function (context) {
 	{
 		// create the new STRIPE Api object
 		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+		
+        let	customerId = "cus_ORiKWvjKWnyxlI";
+        let type = null;
+        let limit = 10;
 
-		// get the list of payment methods
-		let	customerId = "cus_ONY27zDlOdmaaD";
-
-		let	info = await stripeApi.customer_listPaymentMethods(customerId);
-
-		context.assertNotNull(info);
+		let	paymentMethodList = await stripeApi.customer_listPaymentMethods(customerId, type, limit);
 
 		// get the list
-		let	cards = ObjUtils.GetValue(info, "content.data", []);
+		let	cards = ObjUtils.GetValue(paymentMethodList, "content.data", []);
+		console.log({cards})
 		context.assertTrue(cards.length > 0);
+
+		context.assertNotNull(paymentMethodList);
+		context.assertEquals(paymentMethodList.statusCode, 200);
+		context.assertNotNull(paymentMethodList.content);
+		console.log("-> session url: " + paymentMethodList.content.url);
 
 		async.complete();
 	}
@@ -118,6 +124,33 @@ suite.test("StripeAPI.customer_getPaymentMethodIdForOffSession", async function 
 
 		context.assertNotEquals(paymentId, "");
 		console.log("Payment id => " + paymentId);
+
+		async.complete();
+	}
+	catch(e)
+	{
+		console.trace(e);
+		async.complete();
+	}
+});
+
+suite.test("StripeAPI.customer_updateDefaultPaymentMethod", async function (context) {
+
+	let async = context.async();
+
+	try
+	{
+		// create the new STRIPE Api object
+		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+
+		let	customerId = "cus_ORiKWvjKWnyxlI";
+		let paymentId = "pm_1Oi2LhLioETkVPjcOvpGWBr1" // default card to be set
+
+		let	info = await stripeApi.customer_updateDefaultPaymentMethod(customerId, paymentId);
+
+		console.log({info})
+
+		context.assertNotNull(info);
 
 		async.complete();
 	}

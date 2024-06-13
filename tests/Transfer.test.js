@@ -47,4 +47,38 @@ suite.test("StripeAPI.transfer_create", async function (context) {
 	}
 });
 
+suite.test("StripeAPI.transfer_reversal", async function (context) {
+
+	let async = context.async();
+
+	try
+	{
+		// create the new STRIPE Api object
+		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+
+		// create the transfer reversal
+		let	amount = 300;
+		let id = "tr_3ObVx4LioETkVPjc1Ke7WqP5"
+		let	metadata = {
+			id: 4,
+			confirmation_number: "aaaaa",
+			root_id: 1
+		};
+
+		let	transferReversalInfo = await stripeApi.transfer_reversal(id, amount, metadata);
+
+		console.log(transferReversalInfo);
+
+		context.assertNotNull(transferReversalInfo);
+		context.assertEquals(transferReversalInfo.statusCode, 200);
+
+		async.complete();
+	}
+	catch(e)
+	{
+		console.trace(e);
+		async.complete();
+	}
+});
+
 suite.run();

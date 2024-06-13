@@ -84,8 +84,6 @@ suite.test("StripeAPI.checkout_getTotalBreakdownDetails", async function (contex
 		// do the query
 		let	data = await stripeApi.checkout_getTotalBreakdownDetails(id);
 
-		console.log(data)
-
 		// check the response
 		context.assertNotNull(data);
 		context.assertEquals(data.statusCode, 200);
@@ -101,7 +99,7 @@ suite.test("StripeAPI.checkout_getTotalBreakdownDetails", async function (contex
 	}
 });
 
-suite.test("StripeAPI.checkout_createCaptureSession", async function (context) {
+suite.test("StripeAPI.checkout_getCouponInfo", async function (context) {
 
 	let async = context.async();
 
@@ -110,13 +108,46 @@ suite.test("StripeAPI.checkout_createCaptureSession", async function (context) {
 		// create the new STRIPE Api object
 		let	stripeApi = new StripeAPI(vertx, config.secret_key);
 
-		// create the payment session
+		const id = 'cs_test_b1phSHQ6SVSS9VCxpejkVedmPclOZ0l3YrdsMc97cDVuldDFE4LNLV1ZAK'
+
+		// do the query
+		let	couponInfo = await stripeApi.checkout_getCouponInfo(id);
+
+		// check the response
+		context.assertNotNull(couponInfo);
+		context.assertEquals(couponInfo.coupon_amount, 16580);
+		context.assertEquals(couponInfo.coupon_id, "MOdzwUsm");
+		context.assertEquals(couponInfo.coupon_promo_id, "promo_1OJfprLioETkVPjcXxE3jERY");
+		console.log("-> got coupon id: " + couponInfo.coupon_id);
+		async.complete();
+	}
+	catch(e)
+	{
+		console.trace(e);
+		async.complete();
+	}
+});
+
+suite.test("StripeAPI.checkout_createPaymentSessionSetup", async function (context) {
+
+	let async = context.async();
+
+	try
+	{
+		// create the new STRIPE Api object
+		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+
+		// create the payment session		
+		let currency = "usd"
 		let	successUrl = "https://example.com/success";
 		let	cancelUrl = "https://example.com/cancel";
-		let	customerEmail = "mike.jegat@gmail.com";
-		let	customerId = null;
+		let	customerId = "cus_ORiKWvjKWnyxlI";
+		let	metadata = {
+			id: 2,
+			root_id: 5
+		};
 
-		let	sessionInfo = await stripeApi.checkout_createCaptureSession(successUrl, customerEmail, customerId, cancelUrl);
+		let	sessionInfo = await stripeApi.checkout_createPaymentSessionSetup(currency, successUrl, cancelUrl, customerId, metadata);
 
 		context.assertNotNull(sessionInfo);
 		context.assertEquals(sessionInfo.statusCode, 200);

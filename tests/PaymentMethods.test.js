@@ -8,9 +8,10 @@ import { ObjUtils } from 'es4x-utils/src/utils/ObjUtils';
 import { StripeAPI } from '../src/StripeAPI';
 const	config = require('./test_config.json');
 
-const suite = TestSuite.create("ES4X Test: Coupon");
+const suite = TestSuite.create("ES4X Test: PaymentMethods");
 
-suite.test("StripeAPI.coupon_findCoupon", async function (context) {
+
+suite.test("StripeAPI.paymentMethods_detach", async function (context) {
 
 	let async = context.async();
 
@@ -18,17 +19,16 @@ suite.test("StripeAPI.coupon_findCoupon", async function (context) {
 	{
 		// create the new STRIPE Api object
 		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+		
+        let	paymentId = "pm_1Oj9APLioETkVPjcxHLqfCn7";
 
-		const id = 'MOdzwUsm'
+		let	paymentMethodInfo = await stripeApi.paymentMethods_detach(paymentId);
 
-		// do the query
-		let	coupon = await stripeApi.coupon_findCoupon(id);
+		context.assertNotNull(paymentMethodInfo);
+		context.assertEquals(paymentMethodInfo.statusCode, 200);
+		context.assertNotNull(paymentMethodInfo.content);
+        console.log("-> payment method url: " + paymentMethodInfo.content.url);
 
-		// check the response
-		context.assertNotNull(coupon);
-		context.assertEquals(coupon.statusCode, 200);
-		context.assertNotNull(coupon.content);
-		console.log("-> coupon read: " + coupon.content.id);
 		async.complete();
 	}
 	catch(e)

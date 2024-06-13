@@ -124,7 +124,7 @@ class	StripeAPI
 	// doc about splitting charge and transfers:
 	// - https://stripe.com/docs/connect/separate-charges-and-transfers
 	// - https://stripe.com/docs/api/transfers/create
-	async	checkout_createPaymentSession(_id, _items, _serviceFee, _successUrl, _orderDescription = null, _customerEmail = null, _customerId = null, _cancelUrl = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "", _savePayment = true, _skipTransfer = false, _transferGroup = "")
+	async	checkout_createPaymentSession(_id, _items, _serviceFee, _successUrl, _orderDescription = null, _customerEmail = null, _customerId = null, _cancelUrl = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "", _savePayment = true, _skipTransfer = false, _transferGroup = "", _allowPromotionCodes = true)
 	{
 		_customerEmail = StringUtils.IsEmpty(_customerEmail) ? null : _customerEmail;
 
@@ -144,7 +144,7 @@ class	StripeAPI
 				description: StringUtils.IsEmpty(_orderDescription) ? null : _orderDescription,
 				metadata: _metaData
 			},
-			allow_promotion_codes: true,
+			allow_promotion_codes: _allowPromotionCodes,
 		};
 
 		// transfer?
@@ -174,24 +174,22 @@ class	StripeAPI
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);		
 	}
 
-	// only capture the payment method
-	// https://docs.stripe.com/payments/save-and-reuse
-	async	checkout_createCaptureSession(_successUrl, _customerEmail = null, _customerId = null, _cancelUrl = null, _currency = "usd", _secretKey = "")
+	// create a Checkout session setup to save a new payment method
+	// doc: https://stripe.com/docs/payments/save-and-reuse?platform=web&ui=checkout#set-up-stripe
+	async	checkout_createPaymentSessionSetup(_currency = "usd", _successUrl = "", _cancelUrl = null, _customerId = null, _metaData = null, _secretKey = "")
 	{
-
 		// prepare the data
 		let	data = {
 			mode: "setup",
+			currency: _currency,
+			customer: StringUtils.IsEmpty(_cancelUrl) ? null : _customerId,
 			success_url: _successUrl,
 			cancel_url: StringUtils.IsEmpty(_cancelUrl) ? null : _cancelUrl,
-			currency: _currency,
-			customer: StringUtils.IsEmpty(_customerId) ? null : _customerId,
-			customer_email: StringUtils.IsEmpty(_customerEmail) ? _customerEmail : null,
-			customer_creation: StringUtils.IsEmpty(_customerId) ? "always" : null,
+			metadata: _metaData
 		};
 
 		let	path = "/checkout/sessions";
-
+ 
 		// perform the query
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);		
 	}
@@ -206,6 +204,24 @@ class	StripeAPI
 		return await this.query(QueryUtils.HTTP_METHOD_GET, path, null, _secretKey);
 	}
 
+	// get coupon info
+	async checkout_getCouponInfo(_id, _secretKey = "")
+	{
+		let totalBreakdownDetails = await this.checkout_getTotalBreakdownDetails(_id, _secretKey)
+		
+		if (totalBreakdownDetails.content && ObjUtils.GetValueToInt(totalBreakdownDetails, "content.total_details.amount_discount")) 
+		{
+			let data = {
+				coupon_id: ObjUtils.GetValueToString(totalBreakdownDetails, "content.total_details.breakdown.discounts[0].discount.coupon.id"),
+				coupon_promo_id: ObjUtils.GetValueToString(totalBreakdownDetails, "content.total_details.breakdown.discounts[0].discount.promotion_code"),
+				coupon_amount: ObjUtils.GetValueToInt(totalBreakdownDetails, "content.total_details.amount_discount")
+			}
+
+			return data
+		}
+
+		return null
+	}
 
 	// https://stripe.com/docs/api/payment_intents/create
 	async	paymentIntent_createAndConfirm(_id, _amount, _serviceFee, _customerId, _orderDescription = null, _customerEmail = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "", _skipTransfer = false, _transferGroup = "")
@@ -335,10 +351,27 @@ class	StripeAPI
 
 	// List payment methods
 	// doc: https://stripe.com/docs/api/payment_methods/customer_list
-	async	customer_listPaymentMethods(_customerId, _secretKey = "")
+	async	customer_listPaymentMethods(_customerId = null, _type = null, _limit = 10, _endingBefore = null, _startingAfter = null, _secretKey = "")
 	{
-		let	path = "/customers/" + _customerId + "/payment_methods";
+		_type = StringUtils.IsEmpty(_type) ? null : _type;
+		_endingBefore =  StringUtils.IsEmpty(_endingBefore) ? null : _endingBefore;
+		_startingAfter =  StringUtils.IsEmpty(_startingAfter) ? null : _startingAfter;
 
+		let path = "/customers/" + _customerId + "/payment_methods?limit=" + _limit
+
+		if(_type !== null) {
+			path += ("&type=" + _type);
+		}
+
+		if(_endingBefore !== null) {
+			path += ("&ending_before=" + _endingBefore);
+		}
+
+		if(_startingAfter !== null) {
+			path += ("&starting_after=" + _startingAfter);
+		}
+
+		// perform the query
 		return await this.query(QueryUtils.HTTP_METHOD_GET, path, null, _secretKey);
 	}
 
@@ -348,18 +381,42 @@ class	StripeAPI
 		let	customerInfo = await this.customer_get(_customerId, _secretKey);
 
 		// do we have a default source?
-		let	defaultPaymentId = ObjUtils.GetValueToString(customerInfo, "content.default_source");
+		let	defaultPaymentId = ObjUtils.GetValueToString(customerInfo, "content.invoice_settings.default_payment_method");
 		if (StringUtils.IsEmpty(defaultPaymentId) == false)
 			return defaultPaymentId;
 
 		// get the list of payment method
-		let	methodsRet = await this.customer_listPaymentMethods(_customerId, _secretKey);
+		let	methodsRet = await this.customer_listPaymentMethods(_customerId, null, 1, null, null, _secretKey);
 
 		// get the list of methods
 		let	allMethods = ObjUtils.GetValue(methodsRet, "content.data", []);
 
 		// return the id of the first one
 		return ObjUtils.GetValueToString(allMethods, "[0].id");
+	}
+
+	async	customer_updateDefaultPaymentMethod(_customerId, _paymentId, _secretKey = "")
+	{
+		// get the customer info
+		let	customerInfo = await this.customer_get(_customerId, _secretKey);
+
+		// prepare the data
+		let	data = {
+			invoice_settings: {
+				default_payment_method:_paymentId
+			}
+		};
+
+		if (customerInfo.statusCode !== 200)
+		{
+			return null;
+		}
+
+		let path = "/customers/" + _customerId
+
+		let updatedCustomerInfo = await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);
+
+		return updatedCustomerInfo;
 	}
 
 	// create a new transfer
@@ -378,6 +435,23 @@ class	StripeAPI
 		};
 
 		let	path = "/transfers";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);			
+	}
+
+	// Transfer revesal
+	// doc: https://stripe.com/docs/api/transfer_reversals
+	async	transfer_reversal(_id, _amount, _description = "", _metaData = null, _secretKey = "")
+	{
+		// prepare the data
+		let	data = {
+			amount: _amount,
+			description: StringUtils.IsEmpty(_description) ? null : _description,
+			metadata: _metaData,
+		};
+
+		let	path = "/transfers/" + _id + "/reversals";
 
 		// perform the query
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);			
@@ -438,9 +512,53 @@ class	StripeAPI
 	// doc: https://stripe.com/docs/api/promotion_codes/retrieve
 	async	promotionCode_findPromotionCode(_id, _secretKey = "")
 	{
-		let	path = "/promotion_codes/" + _id ;
+		let	path = "/promotion_codes/" + _id;
 
 		return await this.query(QueryUtils.HTTP_METHOD_GET, path, null, _secretKey);
+	}
+
+	// Create a refund
+	// doc: https://stripe.com/docs/api/refunds/create
+	async	refund_create(_id, _amount = null, _secretKey = "")
+	{
+		// prepare the data
+		let	data = {
+			payment_intent: _id,
+			amount: _amount
+		};
+
+		let	path = "/refunds";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);			
+	}
+
+	// Detach a payment menthod
+	// doc: https://stripe.com/docs/api/payment_methods/detach
+	async	paymentMethods_detach(_paymentId, _secretKey = "")
+	{
+		let path = "/payment_methods/" + _paymentId + "/detach"
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, null, _secretKey);
+	}
+
+
+	// STATIC METHODS
+	static	extractPaymentMethodInfo(_paymentMethod) 
+	{
+		return {
+		  id: _paymentMethod.id,
+		  last4: _paymentMethod.card.last4,
+		  customer_id: _paymentMethod.customer,
+		  billing_details: _paymentMethod.billing_details,
+		  card: {
+			brand: _paymentMethod.card.brand,
+			funding: _paymentMethod.card.funding,
+			exp_year: _paymentMethod.card.exp_year,
+			exp_month: _paymentMethod.card.exp_month
+		  },
+		};
 	}
 }
 
