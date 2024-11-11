@@ -22,3 +22,8 @@ Update ES4X Utils:
 ```bash
 npm run update:helpers
 ```
+
+
+curl -G https://api.stripe.com/v1/prices -u "sk_test_51POQH4DfcuRotOGvkVCSoJc07Cs8fSlwFGZ3dr2p1WhnAZ7fyTxZi86TlX6lMlsVZ9SrYAltIzaxi3JmsB07Hbmt00JylR9bs2:" -d "lookup_keys[]"="standard_monthly" -d "lookup_keys[]"="standard_yearly" -d "currency"="eur"
+
+

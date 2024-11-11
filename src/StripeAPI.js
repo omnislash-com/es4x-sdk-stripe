@@ -50,6 +50,7 @@ class	StripeAPI
 			
 			// serialize it
 			dataToSend = ObjUtils.SerializeObject(flattenObj);
+			console.log(dataToSend);
 		}
 
 		// add the version to the path
@@ -543,6 +544,95 @@ class	StripeAPI
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, null, _secretKey);
 	}
 
+	// List prices from lookup keys
+	// doc: https://docs.stripe.com/api/prices/list
+	async	prices_listFromLookupKeys(_lookupKeys, _populateProduct = true, _populateCurrencies = true, _secretKey = "")
+	{
+		// prepare the data
+		let	data = {
+		};
+
+		// add the expand
+		let	expand = [];
+		if (_populateProduct == true)
+			expand.push("data.product");
+		if (_populateCurrencies == true)
+			expand.push("data.currency_options");
+		for(let i=0; i<expand.length; i++)
+		{
+			data["expand[" + i + "]"] = expand[i];
+		}
+
+		// add the lookup keys
+		for(let i=0; i<_lookupKeys.length; i++)
+		{
+			data["lookup_keys[" + i + "]"] = _lookupKeys[i];
+		}
+
+		let	path = "/prices";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_GET, path, data, _secretKey);
+	}
+
+	// Reads a price
+	// doc: https://docs.stripe.com/api/prices/retrieve
+	async	prices_read(_id, _populateProduct = true, _populateCurrencies = true, _secretKey = "")
+	{
+		// prepare the data
+		let	data = {
+		};
+
+		// add the expand
+		let	expand = [];
+		if (_populateProduct == true)
+			expand.push("product");
+		if (_populateCurrencies == true)
+			expand.push("currency_options");
+		for(let i=0; i<expand.length; i++)
+		{
+			data["expand[" + i + "]"] = expand[i];
+		}
+
+		let	path = "/prices/" + _id;
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_GET, path, data, _secretKey);
+	}
+
+	async	prices_listFromLookupKeysToInfo(_lookupKeys, _currency, _secretKey = "")
+	{
+		// read the prices
+		let	prices = await this.prices_listFromLookupKeys(_lookupKeys, true, true, _secretKey);
+
+		// extract the prices
+		let	finalPrices = [];
+		let	allPrices = ObjUtils.GetValue(prices, "content.data", []);
+		for(let price of allPrices)
+		{
+			finalPrices.push(StripeAPI.ExtractPriceInfo(price, _currency));
+		}
+
+		return finalPrices;
+	}
+
+	async	prices_readToInfo(_id, _currency, _secretKey = "")
+	{
+		// read the price
+		let	price = await this.prices_read(_id, true, true, _secretKey);
+
+		// extract the price
+		return StripeAPI.ExtractPriceInfo(price, _currency);
+	}
+
+	async	prices_readFromLookupKeyToInfo(_lookupKey, _currency, _secretKey = "")
+	{
+		// read the price
+		let	price = await this.prices_listFromLookupKeysToInfo([_lookupKey], _currency, _secretKey);
+
+		// return it
+		return ObjUtils.GetValue(price, "[0]");
+	}
 
 	// STATIC METHODS
 	static	extractPaymentMethodInfo(_paymentMethod) 
@@ -559,6 +649,32 @@ class	StripeAPI
 			exp_month: _paymentMethod.card.exp_month
 		  },
 		};
+	}
+
+	static	ExtractPriceInfo(_price, _currency) 
+	{
+		// let's find the currency
+		_currency = _currency.toLowerCase();
+		let	price = ObjUtils.GetValueToInt(_price, "currency_options." + _currency + ".unit_amount", 0);
+		if (price == 0)
+		{
+			// let's find the default currency
+			price = ObjUtils.GetValueToInt(_price, "unit_amount", 0);
+			_currency = ObjUtils.GetValueToString(_price, "currency");
+		}
+
+		// build the object
+		let	obj = {
+			id: ObjUtils.GetValueToString(_price, "id"),
+			lookup_key: ObjUtils.GetValueToString(_price, "lookup_key"),
+			name: ObjUtils.GetValueToString(_price, "product.name"),
+			interval_unit: ObjUtils.GetValueToString(_price, "recurring.interval"),
+			interval_count: ObjUtils.GetValueToInt(_price, "recurring.interval_count"),
+			currency: _currency,
+			price: price,
+		};
+
+		return obj;
 	}
 }
 

@@ -41,6 +41,7 @@
 		"test:Coupon": "es4x test tests/Coupon.test.js",
 		"test:PromotionCode": "es4x test tests/PromotionCode.test.js",
 		"test:Refund": "es4x test tests/Refund.test.js",
+		"test:Price": "es4x test tests/Price.test.js",
 		"test:Utils": "es4x test tests/Utils.test.js",
 		"update:helpers": "npm install git+https://github.com/omnislash-com/es4x-utils.git#main"
 	}

@@ -154,7 +154,8 @@ suite.test("StripeAPI.checkout_createPaymentSessionSetup", async function (conte
 		context.assertNotNull(sessionInfo.content);
 		context.assertNotEquals(sessionInfo.content.url, "");
 		console.log("-> session url: " + sessionInfo.content.url);
-
+		console.log(sessionInfo);
+		
 		async.complete();
 	}
 	catch(e)
