@@ -175,6 +175,36 @@ class	StripeAPI
 		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);		
 	}
 
+	async	checkout_createSubscriptionSession(_priceId, _successUrl, _orderDescription = null, _customerEmail = null, _customerId = null, _cancelUrl = null, _internalId = null, _metaData = null, _currency = "usd", _secretKey = "")
+	{
+		_customerEmail = StringUtils.IsEmpty(_customerEmail) ? null : _customerEmail;
+
+		// prepare the data
+		let	data = {
+			line_items: [{
+				quantity: 1,
+			    price: _priceId,
+			}],
+			mode: "subscription",
+			success_url: _successUrl,
+			cancel_url: StringUtils.IsEmpty(_cancelUrl) ? null : _cancelUrl,
+			client_reference_id: _internalId,
+			currency: _currency,
+			customer: StringUtils.IsEmpty(_customerId) ? null : _customerId,
+			customer_email: StringUtils.IsEmpty(_customerEmail) ? _customerEmail : null,
+			metadata: _metaData,
+			subscription_data: {
+				description: StringUtils.IsEmpty(_orderDescription) ? null : _orderDescription,
+				metadata: _metaData
+			}
+		};
+
+		let	path = "/checkout/sessions";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);
+	}
+
 	// create a Checkout session setup to save a new payment method
 	// doc: https://stripe.com/docs/payments/save-and-reuse?platform=web&ui=checkout#set-up-stripe
 	async	checkout_createPaymentSessionSetup(_currency = "usd", _successUrl = "", _cancelUrl = null, _customerId = null, _metaData = null, _secretKey = "")

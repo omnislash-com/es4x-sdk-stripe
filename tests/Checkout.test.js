@@ -165,4 +165,44 @@ suite.test("StripeAPI.checkout_createPaymentSessionSetup", async function (conte
 	}
 });
 
+suite.test("StripeAPI.checkout_createSubscriptionSession", async function (context) {
+
+	let async = context.async();
+
+	try
+	{
+		// create the new STRIPE Api object
+		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+
+		// create the payment session
+		let	priceId = "price_1QHZwODfcuRotOGvLsZioxfI";
+		let	successUrl = "https://example.com/success";
+		let	cancelUrl = "https://example.com/cancel";
+		let	orderDescription = null;
+		let	customerEmail = "mike.jegat@gmail.com";
+		let	customerId = null;
+		let	internalId = 3;
+		let	metadata = {
+			id: 3,
+			confirmation_number: "aaaaa",
+			root_id: 1
+		};
+
+		let	sessionInfo = await stripeApi.checkout_createSubscriptionSession(priceId, successUrl, orderDescription, customerEmail, customerId, cancelUrl, internalId, metadata);
+
+		context.assertNotNull(sessionInfo);
+		context.assertEquals(sessionInfo.statusCode, 200);
+		context.assertNotNull(sessionInfo.content);
+		context.assertNotEquals(sessionInfo.content.url, "");
+		console.log("-> session url: " + sessionInfo.content.url);
+
+		async.complete();
+	}
+	catch(e)
+	{
+		console.trace(e);
+		async.complete();
+	}
+});
+
 suite.run();
