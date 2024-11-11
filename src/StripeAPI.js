@@ -622,7 +622,7 @@ class	StripeAPI
 		let	price = await this.prices_read(_id, true, true, _secretKey);
 
 		// extract the price
-		return StripeAPI.ExtractPriceInfo(price, _currency);
+		return StripeAPI.ExtractPriceInfo(ObjUtils.GetValue(price, "content"), _currency);
 	}
 
 	async	prices_readFromLookupKeyToInfo(_lookupKey, _currency, _secretKey = "")
