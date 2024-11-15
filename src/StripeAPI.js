@@ -450,6 +450,20 @@ class	StripeAPI
 		return updatedCustomerInfo;
 	}
 
+	async	customer_createPortalSession(_customerId, _returnUrl, _secretKey = "")
+	{
+		// prepare the data
+		let	data = {
+			customer: _customerId,
+			return_url: _returnUrl
+		};
+
+		let	path = "/billing_portal/sessions";
+
+		// perform the query
+		return await this.query(QueryUtils.HTTP_METHOD_POST, path, data, _secretKey);
+	}
+
 	// create a new transfer
 	// doc: https://stripe.com/docs/api/transfers/create
 	async	transfer_create(_destinationId, _amount, _description = "", _transferGroup = "", _metaData = null, _currency = "usd", _secretKey = "", _sourceTransaction = "")

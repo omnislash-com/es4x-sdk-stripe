@@ -161,4 +161,31 @@ suite.test("StripeAPI.customer_updateDefaultPaymentMethod", async function (cont
 	}
 });
 
+suite.test("StripeAPI.customer_createPortalSession", async function (context) {
+
+	let async = context.async();
+
+	try
+	{
+		// create the new STRIPE Api object
+		let	stripeApi = new StripeAPI(vertx, config.secret_key);
+
+		let	customerId = "cus_RCWecI3uZGa4H9";
+		let returnUrl = "https://google.com" // default card to be set
+
+		let	info = await stripeApi.customer_createPortalSession(customerId, returnUrl);
+
+		console.log({info})
+
+		context.assertNotNull(info);
+
+		async.complete();
+	}
+	catch(e)
+	{
+		console.trace(e);
+		async.complete();
+	}
+});
+
 suite.run();
